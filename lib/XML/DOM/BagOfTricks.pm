@@ -65,7 +65,7 @@ use XML::DOM;
 require Exporter;
 use AutoLoader qw(AUTOLOAD);
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 our @ISA = qw(Exporter);
 our %EXPORT_TAGS = ( 'all' => [ qw(
 				   &getTextContents
@@ -142,7 +142,7 @@ sub createElement {
 
 sub createElementwithText {
     my ($doc, $nodename, $textvalue, @attributes) = @_;
-    die "getElementwithText requires a DOMDocument ", caller()  unless (ref $doc && $doc->isa('XML::Xerces::DOMDocument'));
+    die "getElementwithText requires a DOMDocument ", caller()  unless (ref $doc);
     die "getElementwithText requires a name : ", caller() unless $nodename;
     my $node = $doc->createElement($nodename);
     if ($textvalue) {

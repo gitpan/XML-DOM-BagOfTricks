@@ -16,3 +16,5 @@ Revision history for Perl extension XML::DOM::BagOfTricks.
 	- fixed errors in documentation
 	- doubled the number of tests
 	- fixed createDocument to attach root element to document element
+0.05 Wed Mar 30 2005
+	- no longer requires XML::Xerces::DOMDocument in getElementwithText
