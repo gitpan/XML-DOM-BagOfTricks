@@ -25,17 +25,17 @@ my %pubs = (
 			   },
 	   );
 
-my ($doc,$root) = getDocument('Pubs');
+my ($doc,$root) = createDocument('Pubs');
 
 warn "doc : $doc, root : $root\n";
 
 foreach my $pubname (sort keys %pubs) {
-    my $pub = getElement($doc, 'PublicHouse','Name'=>$pubname ,'Brewery'=>$pubs{$pubname}{Brewery}, 'Food'=>$pubs{$pubname}{Food});
+    my $pub = createElement($doc, 'PublicHouse','Name'=>$pubname ,'Brewery'=>$pubs{$pubname}{Brewery}, 'Food'=>$pubs{$pubname}{Food});
 
-    my $pub_tube = getTextElement($doc,'TubeStation',$pubs{$pubname}{Tube});
+    my $pub_tube = createTextElement($doc,'TubeStation',$pubs{$pubname}{Tube});
     $pub->appendChild($pub_tube);
 
-    my $pub_postcode = getTextElement($doc,'Postcode',$pubs{$pubname}{Postcode});
+    my $pub_postcode = createTextElement($doc,'Postcode',$pubs{$pubname}{Postcode});
     $pub->appendChild($pub_postcode);
 
     $root->appendChild($pub);

@@ -42,19 +42,19 @@ my %pubs = (
 			   },
 	   );
 
-my ($doc,$root) = getDocument('Pubs');
+my ($doc,$root) = createDocument('Pubs');
 
 isa_ok( $doc, 'XML::DOM::Document' );
 
 isa_ok( $root, 'XML::DOM::Element' );
 
 foreach my $pubname (sort keys %pubs) {
-    my $pub = getElement($doc, 'PublicHouse','Name'=>$pubname ,'Brewery'=>$pubs{$pubname}{Brewery}, 'Food'=>$pubs{$pubname}{Food});
+    my $pub = createElement($doc, 'PublicHouse','Name'=>$pubname ,'Brewery'=>$pubs{$pubname}{Brewery}, 'Food'=>$pubs{$pubname}{Food});
 
-    my $pub_tube = getTextElement($doc,'TubeStation',$pubs{$pubname}{Tube});
+    my $pub_tube = createTextElement($doc,'TubeStation',$pubs{$pubname}{Tube});
     $pub->appendChild($pub_tube);
 
-    $pub->appendChild(getTextElement($doc,'Postcode',$pubs{$pubname}{Postcode}));
+    $pub->appendChild(createTextElement($doc,'Postcode',$pubs{$pubname}{Postcode}));
 
     $root->appendChild($pub);
 }
