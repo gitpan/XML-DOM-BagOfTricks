@@ -44,7 +44,6 @@ XML::DOM::BagOfTricks - Convenient XML DOM
   # extracts the text content of a node (and its subnodes)
   my $content = getTextContents($node);
 
-
 =head1 DESCRIPTION
 
 XML::DOM::BagOfTricks provides a bundle, or bag, of functions that make
@@ -66,7 +65,7 @@ use XML::DOM;
 require Exporter;
 use AutoLoader qw(AUTOLOAD);
 
-our $VERSION = '0.02';
+our $VERSION = '0.04';
 our @ISA = qw(Exporter);
 our %EXPORT_TAGS = ( 'all' => [ qw(
 				   &getTextContents
@@ -84,9 +83,13 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
     my $node = getTextElement($doc,'Foo','Bar');
 
-    More useful than a pocketful of bent drawing pins! If only the Chilli Peppers
-    made music like they used to 'Zephyr' is no equal of 'Fight Like A Brave' or
-    'Give it away'
+    More useful than a pocketful of bent drawing pins!
+
+    When called with no text value defined, will just return a normal 
+    element without a textnode attached so the example below would 
+    return a node representing '<Foo/>'
+
+    my $node = getTextElement($doc,'Foo');
 
 =cut
 
@@ -94,8 +97,10 @@ sub createTextElement {
     my ($doc, $name, $value) = @_;
     die "createTextElement requires a name  : ", caller() unless $name;
     my $field = $doc->createElement($name);
-    my $fieldvalue = $doc->createTextNode($value);
-    $field->appendChild($fieldvalue);
+    if (defined $value) {
+	my $fieldvalue = $doc->createTextNode($value);
+	$field->appendChild($fieldvalue);
+    }
     return $field;
 }
 
@@ -107,6 +112,9 @@ sub createTextElement {
     In the example below $node would represent '<Foo isBar='0' isFoo='1'/>'
 
     my $node = createElement($doc,'Foo','isBar'=>0, 'isFoo'=>1);
+
+    Undefined attributes will be ignored, if you want to set an attribute value
+    as an empty value pass it an empty string like ''.
 
 =cut
 
@@ -220,6 +228,9 @@ sub addElements {
 
   Preserves the order of the text nodes added.
 
+  If adding elements with no defined text, these will be added
+  as nodes representing '<element_name/>'
+
 =cut
 
 sub addTextElements {
@@ -228,7 +239,8 @@ sub addTextElements {
 
     while (@_) {
 	my $text_elem = $doc->createElement(shift);
-	$text_elem->appendChild($doc->createTextNode(shift));
+	my $value = shift;
+	$text_elem->appendChild($doc->createTextNode($value)) if (defined $value);
 	$node->appendChild($text_elem);
     }
 
@@ -252,7 +264,7 @@ sub addText {
     return $node;
 }
 
-=head2 createDocument($namespace,$root_tag)
+=head2 createDocument($root_tag)
 
 This function will return a nice XML:DOM::Document object,
 if called in array context it will return a list of the Document and the root.
@@ -261,11 +273,11 @@ It requires a root tag, and a list of tags to be added to the document
 
 the tags can be scalars :
 
-my ($doc,$root) = getDocument('Foo', 'Bar', 'Baz');
+my ($doc,$root) = createDocument('Foo', 'Bar', 'Baz');
 
 or a hashref of attributes, and the tags name :
 
-my $doc = getDocument({name=>'Foo', xmlns=>'http://www.other.org/namespace', version=>1.3}, 'Bar', 'Baz');
+my $doc = createDocument({name=>'Foo', xmlns=>'http://www.other.org/namespace', version=>1.3}, 'Bar', 'Baz');
 
 NOTE: attributes of tags will not maintain their order
 
@@ -282,6 +294,8 @@ sub createDocument {
 	    $root->setAttribute($_,$root_tag->{$_});
 	}
     }
+    $doc->appendChild($root);
+
     foreach my $tag ( @tags ) {
 	last unless ($tag);
 	my $element_tag = (ref $tag) ? $tag->{name} : $tag;

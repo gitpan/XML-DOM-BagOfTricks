@@ -7,9 +7,9 @@
 
 use XML::DOM::BagOfTricks q(:all);
 
-use Test::More tests => 4;
+use Test::More tests => 8;
 BEGIN { use_ok('XML::DOM::BagOfTricks') };
-
+use strict;
 #########################
 
 # Insert your test code below, the Test::More module is use()ed here so read
@@ -17,7 +17,7 @@ BEGIN { use_ok('XML::DOM::BagOfTricks') };
 
 
 
-my $okstring = '<Pubs><PublicHouse Name="Cittie of Yorke"><TubeStation>Chancery Lane</TubeStation><Postcode>WC1</Postcode></PublicHouse><PublicHouse Name="Penderals Oak" Brewery="Weatherspoons" Food="True"><TubeStation>Chancery Lane</TubeStation><Postcode>WC1</Postcode></PublicHouse><PublicHouse Name="Star of Belgravia" Brewery="Fullers" Food="True"><TubeStation>Knightsbridge</TubeStation><Postcode>SW1X 8HT</Postcode></PublicHouse><PublicHouse Name="The Angel"><TubeStation>Old Street</TubeStation><Postcode>EC1</Postcode></PublicHouse></Pubs>';
+my $okstring = '<Pubs><PublicHouse Name="Cittie of Yorke"><TubeStation>Chancery Lane</TubeStation><Postcode>WC1</Postcode><Character>Olde London on the river holborn</Character></PublicHouse><PublicHouse Name="Penderals Oak" Brewery="Weatherspoons" Food="True"><TubeStation>Chancery Lane</TubeStation><Postcode>WC1</Postcode><Character/></PublicHouse><PublicHouse Name="Star of Belgravia" Brewery="Fullers" Food="True"><TubeStation>Knightsbridge</TubeStation><Postcode>SW1X 8HT</Postcode></PublicHouse><PublicHouse Name="The Angel"><TubeStation>Old Street</TubeStation><Postcode>EC1</Postcode></PublicHouse></Pubs>';
 
 my %pubs = (
 	    'Star of Belgravia'=> {
@@ -29,12 +29,14 @@ my %pubs = (
 	    'Cittie of Yorke' => {
 				  Tube => 'Chancery Lane',
 				  Postcode => 'WC1',
+				  Character => 'Olde London on the river holborn',
 				 },
 	    'Penderals Oak' => {
 				Tube => 'Chancery Lane',
 				Postcode => 'WC1',
 				Food => 'True',
 				Brewery => 'Weatherspoons',
+				Character => undef,
 			       },
 	    'The Angel' => {
 			    Tube => 'Old Street',
@@ -56,7 +58,22 @@ foreach my $pubname (sort keys %pubs) {
 
     $pub->appendChild(createTextElement($doc,'Postcode',$pubs{$pubname}{Postcode}));
 
+    addTextElements($pub,Character=>$pubs{$pubname}{Character}) if (exists $pubs{$pubname}{Character});
+
     $root->appendChild($pub);
+
 }
 
+# FIXME: this ought to test differences
 ok($okstring eq $root->toString, 'xml output');
+
+
+my ($newdoc,$root2) = createDocument({name=>'Foo', xmlns=>'http://www.other.org/namespace', version=>1.3});
+isa_ok( $doc, 'XML::DOM::Document' );
+
+isa_ok( $root2, 'XML::DOM::Element' );
+
+my $newroot = $newdoc->getDocumentElement();
+isa_ok( $newroot, 'XML::DOM::Element' );
+
+ok($newroot->toString =~ m/\<Foo\s+(xmlns|version)[^\?]*\>/);
